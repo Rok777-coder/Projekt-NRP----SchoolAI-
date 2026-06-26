@@ -6,7 +6,7 @@ import os
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = "nigersaurus_skrivni_kljuc_123!"
+app.secret_key = "schoolai_skrivni_kljuc_123!"
 
 DEEPSEEK_API_KEY = "sk-23064600e2a4423f94014d53302e833c"
 
