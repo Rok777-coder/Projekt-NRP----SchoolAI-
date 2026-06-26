@@ -3,12 +3,10 @@
 <h1>Nigersaurus AI Svetovalec</h1>
 
 <style>
-    /* Dodatni stili za napredno oblikovanje AI odgovorov */
     .ai-message p strong { color: var(--accent); font-weight: bold; }
     .ai-message p u { color: #f0ad4e; text-decoration: underline; }
     .ai-message p .danger-highlight { color: #d9534f; font-weight: bold; text-transform: uppercase; }
     
-    /* Gumb za brisanje sporočil klepeta */
     .delete-chat-msg {
         background: transparent;
         border: none;
@@ -71,23 +69,17 @@
 </div>
 
 <script>
-    // Funkcija za lepše oblikovanje surovega AI besedila (odstrani simbole, doda pravi HTML)
+    
     function formatAIResponse(text) {
         let html = text;
-        // Pretvorba **tekst** v <strong>tekst</strong>
         html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        // Pretvorba _tekst_ v <u>tekst</u>
         html = html.replace(/_(.*?)_/g, '<u>$1</u>');
-        // Pretvorba seznamov (- ali *) v čiste grafične pike
         html = html.replace(/^\s*[-*]\s+(.*?)$/gm, '• $1');
-        // Barvno izpostavljanje kritičnih študijskih besed in padcev (ocena 5)
         html = html.replace(/(padec|negativno|ocena 5|kritično|padel)/gi, '<span class="danger-highlight">$1</span>');
-        // Pretvorba novih vrstic v dejanske HTML prelome vrstic
         html = html.replace(/\n/g, '<br>');
         return html;
     }
 
-    // Ob nalaganju strani formatiraj že obstoječa AI sporočila iz baze
     document.querySelectorAll('.ai-message p').forEach(p => {
         p.innerHTML = formatAIResponse(p.innerHTML);
     });
@@ -108,7 +100,6 @@
         appendMessage('user', 'Ti:', text, null);
         input.value = '';
 
-        // Prikaži animacijo tipkanja s spremembo display lastnosti
         const indicator = document.getElementById('typingIndicator');
         indicator.style.display = 'block';
         chatBox.scrollTop = chatBox.scrollHeight;
@@ -122,7 +113,6 @@
         .then(data => {
             indicator.style.display = 'none';
             
-            // Posodobitev id-ja za uporabnikovo sporočilo, da deluje brisanje brez refresha
             const zadnjeUserSporocilo = chatBox.querySelector('.user-message:last-of-type');
             if(zadnjeUserSporocilo && data.user_id) {
                  dodajSkritoFormo(zadnjeUserSporocilo, data.user_id);
@@ -152,7 +142,6 @@
         div.className = `message ${role}-message`;
         if(id) div.id = "msg-" + id;
         
-        // Če sporočilo pošlje AI, ga pred izrisom lepo oblikujemo
         const obdelanoBesedilo = (role === 'ai') ? formatAIResponse(text) : text;
         
         let brisiGumb = '';
