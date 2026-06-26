@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Nigersaurus AI Svetovalec</h1>
+
+<style>
+    /* Dodatni stili za napredno oblikovanje AI odgovorov */
+    .ai-message p strong { color: var(--accent); font-weight: bold; }
+    .ai-message p u { color: #f0ad4e; text-decoration: underline; }
+    .ai-message p .danger-highlight { color: #d9534f; font-weight: bold; text-transform: uppercase; }
+    
+    /* Gumb za brisanje sporočil klepeta */
+    .delete-chat-msg {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 11px;
+        align-self: flex-end;
+        padding: 2px 5px;
+        opacity: 0.5;
+        transition: opacity 0.2s, color 0.2s;
+    }
+    .delete-chat-msg:hover {
+        opacity: 1;
+        color: var(--danger);
+    }
+    .user-message .delete-chat-msg {
+        align-self: flex-start;
+    }
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+</style>
+
+<div class="card chat-wrapper">
+    <div class="chat-box" id="chatBox">
+        {% if not zgodovina %}
+            <div class="message ai-message">
+                <strong>Nigersaurus Asistent:</strong>
+                <p>Kako ti lahko danes pomagam, {{ session['username'] }}?</p>
+            </div>
+        {% endif %}
+
+        {% for chat in zgodovina %}
+            <div class="message {% if chat.vloga == 'user' %}user-message{% else %}ai-message{% endif %}" id="msg-{{ chat.id }}">
+                <div class="message-header">
+                    <strong>{% if chat.vloga == 'user' %}Ti:{% else %}Nigersaurus Asistent:{% endif %}</strong>
+                    <form action="{{ url_for('izbrisi_sporocilo', id=chat.id) }}" method="POST" style="display:inline;">
+                        <button type="submit" class="delete-chat-msg">Briši</button>
+                    </form>
+                </div>
+                <p>{{ chat.sporocilo }}</p>
+            </div>
+        {% endfor %}
+        
+        <div class="message ai-message" id="typingIndicator" style="display: none;">
+            <strong>Nigersaurus Asistent:</strong>
+            <div class="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="Vprašaj me kaj o tvojem uspehu ali urniku..." required>
+        <button id="sendBtn" class="btn-primary">Pošlji</button>
+    </div>
+</div>
+
+<script>
+    // Funkcija za lepše oblikovanje surovega AI besedila (odstrani simbole, doda pravi HTML)
+    function formatAIResponse(text) {
+        let html = text;
+        // Pretvorba **tekst** v <strong>tekst</strong>
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Pretvorba _tekst_ v <u>tekst</u>
+        html = html.replace(/_(.*?)_/g, '<u>$1</u>');
+        // Pretvorba seznamov (- ali *) v čiste grafične pike
+        html = html.replace(/^\s*[-*]\s+(.*?)$/gm, '• $1');
+        // Barvno izpostavljanje kritičnih študijskih besed in padcev (ocena 5)
+        html = html.replace(/(padec|negativno|ocena 5|kritično|padel)/gi, '<span class="danger-highlight">$1</span>');
+        // Pretvorba novih vrstic v dejanske HTML prelome vrstic
+        html = html.replace(/\n/g, '<br>');
+        return html;
+    }
+
+    // Ob nalaganju strani formatiraj že obstoječa AI sporočila iz baze
+    document.querySelectorAll('.ai-message p').forEach(p => {
+        p.innerHTML = formatAIResponse(p.innerHTML);
+    });
+
+    const chatBox = document.getElementById('chatBox');
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    document.getElementById('sendBtn').addEventListener('click', sendMessage);
+    document.getElementById('userInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    function sendMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if(!text) return;
+
+        appendMessage('user', 'Ti:', text, null);
+        input.value = '';
+
+        // Prikaži animacijo tipkanja s spremembo display lastnosti
+        const indicator = document.getElementById('typingIndicator');
+        indicator.style.display = 'block';
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        fetch('/ai-vprasanje', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ vprasanje: text })
+        })
+        .then(res => res.json())
+        .then(data => {
+            indicator.style.display = 'none';
+            
+            // Posodobitev id-ja za uporabnikovo sporočilo, da deluje brisanje brez refresha
+            const zadnjeUserSporocilo = chatBox.querySelector('.user-message:last-of-type');
+            if(zadnjeUserSporocilo && data.user_id) {
+                 dodajSkritoFormo(zadnjeUserSporocilo, data.user_id);
+            }
+            
+            appendMessage('ai', 'Nigersaurus Asistent:', data.odgovor, data.ai_id);
+        })
+        .catch(() => {
+            indicator.style.display = 'none';
+            appendMessage('ai', 'Svetovalec:', 'Prišlo je do napake.', null);
+        });
+    }
+
+    function dodajSkritoFormo(element, id) {
+        element.id = "msg-" + id;
+        const header = element.querySelector('.message-header');
+        if(header) {
+            header.innerHTML = `<strong>${element.querySelector('strong').innerText}</strong>
+            <form action="/izbrisi-sporocilo/${id}" method="POST" style="display:inline;">
+                <button type="submit" class="delete-chat-msg">Briši</button>
+            </form>`;
+        }
+    }
+
+    function appendMessage(role, sender, text, id) {
+        const div = document.createElement('div');
+        div.className = `message ${role}-message`;
+        if(id) div.id = "msg-" + id;
+        
+        // Če sporočilo pošlje AI, ga pred izrisom lepo oblikujemo
+        const obdelanoBesedilo = (role === 'ai') ? formatAIResponse(text) : text;
+        
+        let brisiGumb = '';
+        if(id) {
+            brisiGumb = `<form action="/izbrisi-sporocilo/${id}" method="POST" style="display:inline;">
+                <button type="submit" class="delete-chat-msg">Briši</button>
+            </form>`;
+        }
+        
+        div.innerHTML = `<div class="message-header">
+            <strong>${sender}</strong>
+            ${brisiGumb}
+        </div><p>${obdelanoBesedilo}</p>`;
+        
+        chatBox.insertBefore(div, document.getElementById('typingIndicator'));
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+{% endblock %}

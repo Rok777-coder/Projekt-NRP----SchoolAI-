@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="detail-header">
+    <a href="/predmeti" class="btn-secondary" style="margin-bottom: 16px;">← Nazaj na predmete</a>
+    <h1>{{ predmet.ime }}</h1>
+    <div class="big-average">
+        Trenutno povprečje: <strong>{{ "%.2f"|format(povprecje) if povprecje else 'Brez ocen' }}</strong>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <h3>Vpiši novo oceno na faksu</h3>
+        <form method="POST" class="grade-form">
+            <div class="form-group">
+                <label>Ocena (5 = padel, 6-10 = opravil)</label>
+                <input type="number" name="vrednost" min="5" max="10" required placeholder="Npr. 8">
+            </div>
+            <div class="form-group">
+                <label>Komentar / Kolokvij</label>
+                <input type="text" name="komentar" placeholder="Npr. 1. Kolokvij">
+            </div>
+            <button type="submit" class="btn-primary">Dodaj Oceno</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3>Zgodovina Ocen</h3>
+        <ul class="grades-list">
+            {% for ocena in ocene %}
+            <li class="grade-item" style="position: relative;">
+                <span class="grade-val val-{{ ocena.vrednost }}">{{ ocena.vrednost }}</span>
+                <span class="grade-desc">{{ ocena.komentar if ocena.komentar else 'Brez opisa' }}</span>
+                
+                <form method="POST" action="/izbrisi-oceno/{{ ocena.id }}/{{ predmet.id }}" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);">
+                    <button type="submit" class="btn-danger" style="padding: 6px 12px; font-size: 12px;">Izbriši</button>
+                </form>
+            </li>
+            {% else %}
+            <li class="grade-item">
+                <span class="grade-desc">Za ta predmet še ni vpisane nobene ocene.</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nigersaurus Asistent</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dark-theme"> <div class="app-container">
+        <nav class="sidebar">
+            <div class="logo-area">
+                <h2>Nigersaurus Asistent</h2>
+            </div>
+            {% if session.get('user_id') %}
+            <div class="user-status">Uporabnik: <strong>{{ session.get('username') }}</strong></div>
+            <a href="/">Domov</a>
+            <a href="/urnik">Urnik</a>
+            <a href="/predmeti">Predmeti & Ocene</a>
+            <a href="/ai-svetovalec">Nigersaurus AI</a>
+            <a href="/odjava" class="logout-btn">Odjava</a>
+            {% endif %}
+            
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" checked />
+                    <div class="slider round"></div>
+                </label>
+                <span>Temni Način</span>
+            </div>
+        </nav>
+        <main class="content animate-fade">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for cat, msg in messages %}
+                        <div class="flash {{ cat }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme) {
+            document.body.className = currentTheme;
+            if (currentTheme === 'dark-theme') {
+                toggleSwitch.checked = true;
+            } else {
+                toggleSwitch.checked = false;
+            }
+        }
+
+        function switchTheme(e) {
+            if (e.target.checked) {
+                document.body.className = 'dark-theme';
+                localStorage.setItem('theme', 'dark-theme');
+            } else {
+                document.body.className = 'light-theme';
+                localStorage.setItem('theme', 'light-theme');
+            }
+        }
+        toggleSwitch.addEventListener('change', switchTheme, false);
+    </script>
+</body>
+</html>

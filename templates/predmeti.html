@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Predmeti in Ocene</h1>
+
+<div class="card form-card" style="margin-bottom: 24px;">
+    <h3>Dodaj nov predmet</h3>
+    <form method="POST" class="clean-form" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <input type="text" name="ime" placeholder="Ime predmeta (npr. Analiza 1)" required style="flex: 1; min-width: 200px;">
+        <button type="submit" class="btn-primary">Dodaj Predmet</button>
+    </form>
+</div>
+
+<div class="dashboard-grid">
+    {% for p in predmeti %}
+    <div class="card feature-card animate-fade {% if p.ima_petico > 0 %}critical-card{% endif %}" style="position: relative;">
+        
+        {% if p.ima_petico > 0 %}
+        <div class="critical-badge">⚠️ KRITIČNO - PADEC (5)</div>
+        {% endif %}
+
+        <form method="POST" action="/izbrisi-predmet/{{ p.id }}" onsubmit="return confirm('Izbrišem predmet in vse njegove ocene?');" style="position:absolute; top: 15px; right: 15px; margin: 0;">
+            <button type="submit" class="btn-danger" style="padding: 4px 8px; font-size:12px;">Izbriši</button>
+        </form>
+
+        <h3 style="padding-right: 60px; margin-top: 5px;">{{ p.ime }}</h3>
+        <div class="big-average" style="font-size: 1.1rem; margin: 12px 0;">
+            Povprečje: 
+            <strong>
+                {% if p.povprecje %}
+                    {{ "%.2f"|format(p.povprecje) }}
+                {% else %}
+                    Brez ocen
+                {% endif %}
+            </strong>
+        </div>
+        <a href="/predmet/{{ p.id }}" class="link-btn" style="width:100%; margin-top:10px;">Odpri podrobnosti</a>
+    </div>
+    {% else %}
+    <div class="card" style="grid-column: 1 / -1; text-align: center;">
+        <p>Nimaš še dodanih predmetov. Vpiši svoj prvi predmet zgoraj!</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

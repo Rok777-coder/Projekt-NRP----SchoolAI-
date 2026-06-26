@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h1>Moj Urnik</h1>
+    <form method="POST" action="/resetiraj-urnik" onsubmit="return confirm('Res želiš izbrisati celoten urnik?');">
+        <button type="submit" class="btn-danger">🗑 Resetiraj celoten urnik</button>
+    </form>
+</div>
+
+<div class="card form-card" style="margin-bottom: 24px;">
+    <h3>Dodaj aktivnost</h3>
+    <form method="POST" class="schedule-form clean-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <select name="dan" required>
+            <option value="Ponedeljek">Ponedeljek</option>
+            <option value="Torek">Torek</option>
+            <option value="Sreda">Sreda</option>
+            <option value="Četrtek">Četrtek</option>
+            <option value="Petek">Petek</option>
+            <option value="Sobota">Sobota</option>
+            <option value="Nedelja">Nedelja</option>
+        </select>
+        
+        <select name="ura" required>
+            {% for u, cas in ure_casovnik.items() %}
+                <option value="{{ u }}">{{ cas }}</option>
+            {% endfor %}
+        </select>
+        
+        <input type="text" name="kratica" placeholder="Aktivnost (npr. SPA, MAT, UČENJE)" required>
+        <input type="text" name="profesor" placeholder="Opis / Profesor">
+        <input type="text" name="ucilnica" placeholder="Lokacija (npr. Doma, Faks)">
+        <button type="submit" class="btn-primary">Dodaj</button>
+    </form>
+</div>
+
+<div class="timetable-container">
+    <table class="easistent-table">
+        <thead>
+            <tr>
+                <th>Ura</th>
+                {% for dan in ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'] %}
+                <th>{{ dan }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for u, dnevi in urnik_grid.items() %}
+            <tr>
+                <td class="hour-cell" style="white-space: nowrap;">
+                    <span class="hour-time"><strong>{{ ure_casovnik[u] }}</strong></span>
+                </td>
+                
+                {% for dan in ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'] %}
+                <td class="timetable-slot">
+                    {% if dnevi[dan] %}
+                    <div class="subject-box">
+                        <form method="POST" action="/izbrisi-urnik/{{ dnevi[dan].id }}">
+                            <button type="submit" class="delete-mini" title="Izbriši">×</button>
+                        </form>
+                        <strong class="sub-title">{{ dnevi[dan].kratica }}</strong>
+                        <span class="sub-prof" style="font-size:12px;">{{ dnevi[dan].profesor }}</span>
+                        <span class="sub-room" style="font-size:12px; color:var(--text-sub);">{{ dnevi[dan].ucilnica }}</span>
+                    </div>
+                    {% endif %}
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

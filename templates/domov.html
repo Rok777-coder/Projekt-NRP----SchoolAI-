@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="home-hero" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1200&auto=format&fit=crop');">
+    <h1>Pozdravljen v svojem študijskem prostoru</h1>
+    <p>Pregled tvojih obveznosti, urnika in inteligentne analize na enem mestu.</p>
+</div>
+
+<div class="card quote-card animate-fade">
+    <p class="quote">"{{ citat }}"</p>
+    <p class="author">- {{ avtor }}</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card feature-card">
+        <h3>Tedenski Urnik</h3>
+        <p>Preveri postavitev predavanja v eAsistent obliki mrežnega tedna.</p>
+        <a href="/urnik" class="link-btn">Odpri Urnik →</a>
+    </div>
+    <div class="card feature-card">
+        <h3>Ocene in Uspeh</h3>
+        <p>Vnašaj posamezne ocene za predmete in spremljaj nihanje povprečja.</p>
+        <a href="/predmeti" class="link-btn">Preglej Ocene →</a>
+    </div>
+</div>
+{% endblock %}

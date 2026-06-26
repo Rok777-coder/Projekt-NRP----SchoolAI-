@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <title>Nigersaurus Asistent - Vstop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="dark-theme auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Nigersaurus Asistent</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for cat, msg in messages %}
+                        <div class="flash {{ cat }}">{{ msg }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="form-group">
+                    <label>Uporabniško ime</label>
+                    <input type="text" name="username" placeholder="Vnesi uporabniško ime" required>
+                </div>
+                <div class="form-group">
+                    <label>Geslo</label>
+                    <input type="password" name="password" placeholder="Vnesi geslo" required>
+                </div>
+                <button type="submit" class="btn-primary">
+                    {% if način == 'prijava' %}Prijava{% else %}Registracija{% endif %}
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                {% if način == 'prijava' %}
+                    Nimaš računa? <a href="/registracija">Registriraj se</a>
+                {% else %}
+                    Že imaš račun? <a href="/prijava">Prijavi se</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
