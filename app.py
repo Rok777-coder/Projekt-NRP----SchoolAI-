@@ -8,12 +8,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = "nigersaurus_skrivni_kljuc_123!"
 
-DEEPSEEK_API_KEY = "sk-23064600e2a4423f94014d53302e833c" # Pazi na ključ!
+DEEPSEEK_API_KEY = "sk-23064600e2a4423f94014d53302e833c"
 
-# 24-urni časovnik (od 00:00 do 23:59)
 URE_CASOVNIK = {i: f"{i:02d}:00 - {(i+1)%24:02d}:00" for i in range(24)}
 
-# Funkcija za branje citatov iz datoteke citati.txt
 def nalozi_citate():
     ZADRŽANI_CITATI = [
         {"quote": "Vrhunska umetnost vojne je podrediti si sovražnika brez boja.", "author": "Sun Tzu"},
@@ -206,7 +204,6 @@ def ai_svetovalec():
     if 'user_id' not in session: return redirect(url_for('prijava'))
     
     conn = get_db_connection()
-    # Avtomatsko brisanje klepeta starejšega od 1 ure (-1 hour) namesto 1 tedna
     conn.execute("DELETE FROM chat_history WHERE user_id = ? AND ustvarjeno < datetime('now', '-1 hour')", (session['user_id'],))
     conn.commit()
     
@@ -231,7 +228,6 @@ def ai_vprasanje():
     user_id = session['user_id']
     
     conn = get_db_connection()
-    # Shranjevanje uporabnikovega vnosa v bazo
     cursor = conn.cursor()
     cursor.execute("INSERT INTO chat_history (user_id, vloga, sporocilo) VALUES (?, 'user', ?)", (user_id, uporabnikov_vnos))
     user_msg_id = cursor.lastrowid
@@ -250,7 +246,6 @@ def ai_vprasanje():
         
     messages = [{"role": "system", "content": f"Si AI študijski asistent. Študent ima ta profil:\n{kontekst}\nSvetuj mu kdaj naj spi, jé in se uči na podlagi urnika. Odgovori kratko, v slovenščini, pazi na negativne ocene (5). Uporabljaj običajen tekst, za poudarke pa lahko uporabiš **krepko** ali _podčrtano_."}]
     
-    # Pridobivanje zadnjih 4 sporočil iz baze za kontekst (brez trenutno vstavljenega vnosa)
     zadnji_klepeti = conn.execute("SELECT vloga, sporocilo FROM chat_history WHERE user_id = ? AND id < ? ORDER BY ustvarjeno DESC LIMIT 4", (user_id, user_msg_id)).fetchall()
     zadnji_klepeti.reverse()
     
@@ -264,7 +259,6 @@ def ai_vprasanje():
     except Exception as e:
         odgovor_ai = f"Napaka: {str(e)}"
         
-    # Shranjevanje AI odgovora v bazo
     cursor.execute("INSERT INTO chat_history (user_id, vloga, sporocilo) VALUES (?, 'ai', ?)", (user_id, odgovor_ai))
     ai_msg_id = cursor.lastrowid
     conn.commit()
