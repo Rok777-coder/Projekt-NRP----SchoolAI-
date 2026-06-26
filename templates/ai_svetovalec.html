@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Nigersaurus AI Svetovalec</h1>
+<h1>School AI Svetovalec</h1>
 
 <style>
     .ai-message p strong { color: var(--accent); font-weight: bold; }
@@ -37,7 +37,7 @@
     <div class="chat-box" id="chatBox">
         {% if not zgodovina %}
             <div class="message ai-message">
-                <strong>Nigersaurus Asistent:</strong>
+                <strong>School AI Asistent:</strong>
                 <p>Kako ti lahko danes pomagam, {{ session['username'] }}?</p>
             </div>
         {% endif %}
@@ -45,7 +45,7 @@
         {% for chat in zgodovina %}
             <div class="message {% if chat.vloga == 'user' %}user-message{% else %}ai-message{% endif %}" id="msg-{{ chat.id }}">
                 <div class="message-header">
-                    <strong>{% if chat.vloga == 'user' %}Ti:{% else %}Nigersaurus Asistent:{% endif %}</strong>
+                    <strong>{% if chat.vloga == 'user' %}Ti:{% else %}School AI Asistent:{% endif %}</strong>
                     <form action="{{ url_for('izbrisi_sporocilo', id=chat.id) }}" method="POST" style="display:inline;">
                         <button type="submit" class="delete-chat-msg">Briši</button>
                     </form>
@@ -55,7 +55,7 @@
         {% endfor %}
         
         <div class="message ai-message" id="typingIndicator" style="display: none;">
-            <strong>Nigersaurus Asistent:</strong>
+            <strong>School AI Asistent:</strong>
             <div class="typing-indicator">
                 <span></span><span></span><span></span>
             </div>
@@ -118,7 +118,7 @@
                  dodajSkritoFormo(zadnjeUserSporocilo, data.user_id);
             }
             
-            appendMessage('ai', 'Nigersaurus Asistent:', data.odgovor, data.ai_id);
+            appendMessage('ai', 'School AI Asistent:', data.odgovor, data.ai_id);
         })
         .catch(() => {
             indicator.style.display = 'none';
